@@ -46,7 +46,7 @@ icp:
 
 channels:
   email:
-    enabled: true
+    enabled: false
     provider: "gmail"          # gmail (recommended) | microsoft | smtp | instantly
     max_daily_sends: 50
     require_approval: true      # native: review in Outbox; Instantly: sending held
@@ -91,7 +91,7 @@ usage:
   quiet_hours:
     start: "22:00"
     end: "07:00"
-    timezone: "America/New_York"
+    timezone: "Europe/London"
 
 # Optional: check each new recipient with Precleared (precleared.dev) before
 # the first cold email: may cold marketing email go to this address under UK

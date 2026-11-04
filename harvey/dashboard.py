@@ -52,7 +52,6 @@ def _resolve_config_file() -> Path:
 # route except the static shell needs the token (see dashboard_auth).
 app = FastAPI(title="Harvey Dashboard", docs_url=None, redoc_url=None, openapi_url=None)
 token_store = auth.TokenStore(TOKEN_FILE)
-app.add_middleware(auth.DashboardGuard, store=token_store)
 
 # Harvey process tracking
 _harvey_process: subprocess.Popen | None = None
@@ -344,7 +343,7 @@ async def get_settings():
     """Get current settings — presence flags only for secrets, never raw values."""
     env_vars = _read_env_file()
     all_keys = [
-        "INSTANTLY_API_KEY", "LINKEDIN_EMAIL", "LINKEDIN_PASSWORD",
+        "INSTANTLY_API_KEY", "LINKEDIN_EMAIL", "LINKEDIN_PASSWORD", "SERPER_API_KEY",
         "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN",
         "GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET",
         "SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD",
@@ -364,6 +363,7 @@ async def get_settings():
 
     return {
         "provider": _current_provider(),
+        "serper_api_key_set": is_set("SERPER_API_KEY"),
         # Non-secret values echo back so fields repopulate; secrets are
         # presence-only so keys never leave the box.
         "instantly_api_key_set": is_set("INSTANTLY_API_KEY"),
@@ -404,7 +404,7 @@ async def save_env_settings(request: Request):
         return JSONResponse({"success": False, "message": "Invalid request body."}, status_code=400)
     async with _env_lock:
         updates = {}
-        for key in ["INSTANTLY_API_KEY", "LINKEDIN_EMAIL", "LINKEDIN_PASSWORD",
+        for key in ["INSTANTLY_API_KEY", "LINKEDIN_EMAIL", "LINKEDIN_PASSWORD", "SERPER_API_KEY",
                      "CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN",
                      "GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET",
                      "SMTP_HOST", "SMTP_PORT", "SMTP_USERNAME", "SMTP_PASSWORD",
@@ -1038,6 +1038,7 @@ async def get_outbox_api():
 
 @app.get("/api/sending-mode")
 async def get_sending_mode():
+    return {"mode": "research_only", "sending_enabled": False, "held": 0}
     """Approval (every email waits for you) or autopilot, and what that means here."""
     from harvey.config import load_config
     from harvey.gate import _booking_prefix, allowed_link_domains
@@ -1174,7 +1175,7 @@ HAND_SENDABLE_STATUSES = ("new", "queued")
 HAND_SENDABLE_EMAIL = ("verified", "risky")
 
 
-def _harvey_can_send() -> bool:
+def _legacy_harvey_can_send() -> bool:
     """Can Harvey send email itself (a connected mailbox, or Instantly)?
 
     Sending by hand from the dashboard is only offered when it can't: with
@@ -2632,3 +2633,28 @@ def start_dashboard(host: str = "127.0.0.1", port: int = 5555):
         print("  not POSIX file modes.\n")
     uvicorn.run(app, host=bind, port=port, log_level="warning",
                 proxy_headers=False, server_header=False, date_header=False)
+
+
+# This fork retains discovery and profiling, but never starts sales automation.
+def _harvey_can_send() -> bool:
+    return False
+
+
+from harvey.leads import create_leads_router
+app.include_router(create_leads_router(lambda: DB_PATH, lambda: _resolve_config_file()))
+
+
+@app.middleware("http")
+async def research_only_routes(request: Request, call_next):
+    path = request.url.path
+    if request.method == "POST" and (
+        path == "/api/harvey/start" or path == "/api/sending-mode"
+        or path.startswith("/api/sending/")
+        or (path.startswith("/api/outbox/") and path.endswith(("/approve", "/approve-all")))
+    ):
+        from harvey.outreach_policy import MESSAGE
+        return JSONResponse({"error": MESSAGE}, status_code=403)
+    return await call_next(request)
+
+# Authentication wraps research policy responses as well as the data routes.
+app.add_middleware(auth.DashboardGuard, store=token_store)

@@ -1,4 +1,4 @@
-let currentTab = 'today';
+let currentTab = 'leads';
 let companyDrill = false;      // true while viewing a single company's contacts
 let _companies = [], _prospects = [], _campaigns = [];
 let _signals = null;           // last /api/signals payload, for the cohort builder
@@ -407,6 +407,7 @@ function showTab(id, btn) {
 
 function loadCurrentTab() {
   switch (currentTab) {
+    case 'leads': loadLeads(); break;
     case 'today': loadLiveStatus(); loadToday(); loadTrend(); loadFunnel(); loadSetupStatus(); loadRuns(); loadTodayActivity(); break;
     case 'signals': loadSignals(); break;
     case 'discover': loadDiscoverProviders(); break;
@@ -417,7 +418,7 @@ function loadCurrentTab() {
     case 'conversations': loadConversations(); break;
     case 'activity': loadActivity(); break;
     case 'usage': loadUsage(); break;
-    case 'settings': loadSettings(); loadSendingModeCard(); break;
+    case 'settings': loadSettings(); loadLeadSettings(); break;
     case 'controls': loadHarveyStatus(); loadLogs(); break;
   }
 }
@@ -1789,6 +1790,8 @@ function renderSendingModeCard() {
 }
 
 async function loadSendingModeCard() {
+  document.getElementById('sending-mode-card').innerHTML = '';
+  return;
   const m = await api('/api/sending-mode');
   _sendingMode = m && !m.error ? m : null;
   renderSendingModeCard();
@@ -2571,35 +2574,10 @@ async function loadActivity() {
   el.innerHTML = html + '</div></div>';
 }
 
-// ── Init & live refresh ──
-
-loadToday();
-loadTrend();
-loadFunnel();
-loadSetupStatus();
-loadRuns();
-loadTodayActivity();
-loadHarveyStatus();
-
-loadLiveStatus();
-
-// Agent status: quick poll (not while locked: it would only be refused)
-setInterval(() => { if (!_locked) loadHarveyStatus(); }, 8000);
-
-// Live status panel: refreshed while the Today tab is open and visible.
-setInterval(() => {
-  if (!document.hidden && !_locked && currentTab === 'today') loadLiveStatus();
-}, 10000);
-
-// Nav counts stay live wherever you are, so "something needs me" is visible
-// from any tab without polling that tab's contents.
-setInterval(async () => {
-  if (document.hidden || _locked || currentTab === 'today') return;
-  const data = await api('/api/today');
-  if (!data) return;
-  navCount('nav-today', (data.items || []).filter(i => i.tone !== 'good').length);
-  navCount('nav-outbox', (data.stats || {}).outbox_pending || 0);
-}, 20000);
+// ── Init: the research page, with no sales setup or inbox polling ──
+loadLeads();
+document.getElementById('header-status-text').textContent = 'Research only';
+document.getElementById('header-dot').className = 'status-dot';
 
 // Data tabs: auto-refresh live views without clobbering anything in progress.
 // Outbox, settings and help are deliberately excluded — re-rendering the desk

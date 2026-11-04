@@ -329,9 +329,9 @@ def test_authorised_mutations_with_a_body_must_be_json(authed, content_type):
     assert not dash.ENV_FILE.exists()
 
 
-def test_bodyless_mutations_still_work(authed):
-    assert authed.post("/api/sending/pause").json()["success"]
-    assert authed.post("/api/sending/resume").json()["success"]
+def test_bodyless_sending_mutations_are_disabled_in_research_fork(authed):
+    assert authed.post("/api/sending/pause").status_code == 403
+    assert authed.post("/api/sending/resume").status_code == 403
 
 
 # ── Authorised flows ──

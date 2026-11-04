@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<title>Harvey — Command Deck</title>
+<title>FindClients — Research desk</title>
 <!-- First, so the token leaves the address bar before anything else runs. -->
 <script src="/static/auth.js"></script>
 <link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/static/leads.css">
 </head>
 <body>
 
@@ -63,16 +64,14 @@
 
 <aside class="sidebar">
   <div class="brand">
-    <h1>Harvey</h1>
-    <div class="tagline">Always Be Closing</div>
+    <h1>FindClients</h1>
+    <div class="tagline">Evidence before outreach</div>
   </div>
 
   <nav aria-label="Sections">
     <div class="nav-group">
       <div class="nav-label">Work</div>
-      <button class="active" onclick="showTab('today', this)"><svg class="icon" aria-hidden="true"><use href="#i-today"/></svg><span class="label">Today</span><span class="nav-count" id="nav-today"></span></button>
-      <button onclick="showTab('outbox', this)"><svg class="icon" aria-hidden="true"><use href="#i-outbox"/></svg><span class="label">Outbox</span><span class="nav-count" id="nav-outbox"></span></button>
-      <button onclick="showTab('conversations', this)"><svg class="icon" aria-hidden="true"><use href="#i-conversations"/></svg><span class="label">Conversations</span><span class="nav-count" id="nav-conversations"></span></button>
+      <button class="active" onclick="showTab('leads', this)"><svg class="icon" aria-hidden="true"><use href="#i-contacts"/></svg><span class="label">Leads</span></button>
     </div>
     <div class="nav-group">
       <div class="nav-label">Pipeline</div>
@@ -80,13 +79,11 @@
       <button onclick="showTab('discover', this)"><svg class="icon" aria-hidden="true"><use href="#i-discover"/></svg><span class="label">Discover</span></button>
       <button onclick="showTab('companies', this)"><svg class="icon" aria-hidden="true"><use href="#i-companies"/></svg><span class="label">Companies</span></button>
       <button onclick="showTab('prospects', this)"><svg class="icon" aria-hidden="true"><use href="#i-contacts"/></svg><span class="label">Contacts</span></button>
-      <button onclick="showTab('campaigns', this)"><svg class="icon" aria-hidden="true"><use href="#i-campaigns"/></svg><span class="label">Campaigns</span></button>
     </div>
     <div class="nav-group">
       <div class="nav-label">System</div>
       <button onclick="showTab('activity', this)"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg><span class="label">Activity</span></button>
       <button onclick="showTab('usage', this)"><svg class="icon" aria-hidden="true"><use href="#i-usage"/></svg><span class="label">Usage</span></button>
-      <button onclick="showTab('controls', this)"><svg class="icon" aria-hidden="true"><use href="#i-controls"/></svg><span class="label">Controls</span></button>
       <button onclick="showTab('settings', this)"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span class="label">Settings</span></button>
       <button onclick="showTab('help', this)"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg><span class="label">Help</span></button>
     </div>
@@ -109,8 +106,23 @@
 <main class="content">
 <div class="content-inner">
 
-<!-- Today: what needs a human -->
-<div id="today" class="section active">
+
+<div id="leads" class="section active">
+ <div class="section-head"><div><span class="eyebrow">YOUR RESEARCH DESK</span><h2>Leads</h2><p>Find a good fit. Find a real detail. Start the conversation yourself.</p></div><button class="btn btn-secondary" onclick="exportLeadResearch()">Export checked prospects</button></div>
+ <div class="lead-banner"><strong>Research & drafts only.</strong> Automatic sending and inbox handling are disabled. Review the research, then copy a message or export a prospect record.</div>
+ <div id="lead-metrics" class="lead-metrics"></div>
+ <p id="lead-outcomes" class="hint"></p>
+ <div class="lead-toolbar"><label class="sr-only" for="lead-search">Search prospects</label><input class="form-input" id="lead-search" type="search" placeholder="Search companies or people…" oninput="renderLeadBoard()"><label class="sr-only" for="lead-filter-stage">Filter by stage</label><select class="form-input" id="lead-filter-stage" onchange="renderLeadBoard()"><option value="">All stages</option><option value="new">New</option><option value="shortlisted">Shortlisted</option><option value="contacted">Contacted</option><option value="replied">Replied</option><option value="interested">Interested</option><option value="sold">Sold</option><option value="archived">Archived</option><option value="do_not_contact">Do not contact</option></select><label class="lead-checkbox"><input type="checkbox" id="lead-filter-checked" onchange="renderLeadBoard()">Checked evidence only</label><span id="lead-count" class="hint"></span></div>
+ <div id="lead-board" class="lead-board" aria-live="polite"><div class="card lead-empty">Loading prospects…</div></div>
+ <div class="lead-config-grid lead-config">
+  <details class="card"><summary>Add a company</summary><p>Start with one company you want to research, or use <a href="#" onclick="goTab('discover');return false">Discover</a> to find more.</p><form onsubmit="addLeadCompany(event)"><label class="form-label" for="lead-new-name">Company name</label><input class="form-input" id="lead-new-name" minlength="2" maxlength="200" required><label class="form-label" for="lead-new-website">Company website</label><input class="form-input" id="lead-new-website" type="url" required placeholder="https://example.com"><button class="btn btn-primary" type="submit">Add company</button></form></details>
+  <details class="card"><summary>Product you’re finding customers for</summary><p>This installation researches for one active product. Saving a different product clears old message drafts; company evidence stays.</p><form onsubmit="saveLeadProduct(event)"><label class="form-label" for="lead-product-name">Product name</label><input class="form-input" id="lead-product-name" minlength="2" maxlength="150" required><label class="form-label" for="lead-product-description">What it does, and which problem it solves</label><textarea class="form-input" id="lead-product-description" minlength="20" maxlength="4000" required rows="4"></textarea><label class="form-label" for="lead-product-customer">Who should benefit?</label><textarea class="form-input" id="lead-product-customer" minlength="10" maxlength="2000" required rows="2"></textarea><button class="btn btn-primary" type="submit">Save product context</button></form></details>
+ </div>
+</div>
+<dialog id="lead-dialog" class="lead-dialog" aria-label="Prospect research"><div id="lead-detail"></div><div id="lead-action-status" class="lead-feedback" role="status"></div></dialog>
+
+<!-- Today: historical pipeline -->
+<div id="today" class="section">
   <div class="section-head">
     <div>
       <h2>Today</h2>
@@ -288,6 +300,10 @@
 <div id="settings" class="section">
   <div class="section-head"><div><h2>Settings</h2><p>Credentials are stored locally in <code>.env</code> and never sent anywhere except the services themselves.</p></div></div>
 
+  <div class="lead-banner">Research runs on demand. No mailbox connection is needed, and automatic sending is disabled.</div>
+  <div class="card"><h3>Research search provider</h3><p>Website research needs no search key. Optionally add Serper to find review and professional profile links. Each company search uses two queries against your provider credits.</p><form onsubmit="saveLeadSearchKey(event)"><label class="form-label" for="lead-serper-key">Serper API key</label><input class="form-input" type="password" id="lead-serper-key" autocomplete="off"><button class="btn btn-primary" type="submit">Save search key</button></form></div>
+  <div class="card"><h3>AI for research and drafts</h3><p>Use your configured Claude Code or Codex login. Research text is passed to the selected provider; it is not entirely offline.</p><form onsubmit="saveLeadBrain(event)"><label class="form-label" for="lead-brain-provider">Provider</label><select class="form-input" id="lead-brain-provider"><option value="claude">Claude Code</option><option value="codex">Codex</option></select><label class="form-label" for="lead-brain-model">Model (optional; blank uses the provider default)</label><input class="form-input" id="lead-brain-model" maxlength="150"><button class="btn btn-primary" type="submit">Save AI settings</button></form></div>
+  <div hidden>
   <div class="subhead">Sending</div>
   <div id="sending-mode-card"></div>
 
@@ -374,6 +390,8 @@
     </div>
   </div>
 
+  </div>
+  <div hidden>
   <div class="subhead">Email verification <span class="hint">Strongly recommended</span></div>
   <div class="card">
     <div class="settings-row">
@@ -431,6 +449,7 @@
       </div>
     </div>
   </div>
+  </div>
 </div>
 
 <!-- Controls -->
@@ -457,109 +476,12 @@
 </div>
 
 <!-- Help -->
-<div id="help" class="section">
-  <div class="section-head"><div><h2>Help</h2><p>What Harvey is, how it works, and how to fix the usual problems.</p></div></div>
-
-  <div class="help-section">
-    <h2>What is Harvey?</h2>
-    <p>Harvey is an autonomous AI sales agent. Once set up, Harvey runs on its own: finds people who match your ideal customer, writes personalized cold emails, sends them through your email platform, reads every reply, handles objections, and works toward booking a meeting. You review everything through this dashboard.</p>
-    <p>Harvey runs on your Claude Max subscription (or, if you opt in, your ChatGPT plan through Codex), so there are no extra AI costs. Everything stays on your machine in one folder.</p>
-  </div>
-
-  <div class="help-section">
-    <h2>Getting started</h2>
-    <p>There are three things to do:</p>
-    <pre>1. Go to the Settings tab and connect an email provider (Gmail recommended)
-2. Train Harvey on your product (through Claude or the command line)
-3. Go to the Controls tab and click Start</pre>
-    <p>Today shows exactly what's done and what still needs to happen.</p>
-  </div>
-
-  <div class="help-section">
-    <h2>Where everything lives</h2>
-    <p>Everything Harvey needs is inside this one project folder. Nothing is stored elsewhere.</p>
-    <div class="table-card">
-    <table class="file-table">
-      <tr><td>.env</td><td>Your API keys and credentials (never shared or committed)</td></tr>
-      <tr><td>harvey.yaml</td><td>Your product info, target customers, and behavior settings</td></tr>
-      <tr><td>skills/</td><td>Sales knowledge files. Edit these to change how Harvey writes and sells.</td></tr>
-      <tr><td>skills/product_knowledge.md</td><td>Everything Harvey knows about your product (auto-generated from training)</td></tr>
-      <tr><td>prompts/</td><td>Prompt templates for each agent. Advanced customization.</td></tr>
-      <tr><td>data/harvey.db</td><td>Database with all prospects, campaigns, and conversations</td></tr>
-      <tr><td>data/harvey.log</td><td>Log file showing what Harvey is doing</td></tr>
-    </table>
-    </div>
-  </div>
-
-  <div class="help-section">
-    <h2>Getting your API keys</h2>
-
-    <details>
-      <summary>Instantly API key (legacy)</summary>
-      <div class="faq-body">
-        <p>Instantly is the legacy sending option; Gmail or SMTP is recommended.</p>
-        <p>1. Sign up at <a href="https://instantly.ai" target="_blank" rel="noopener">instantly.ai</a> (you need the Growth plan for API access)</p>
-        <p>2. Go to Settings &gt; Integrations</p>
-        <p>3. Copy your API key</p>
-        <p>4. Paste it in the Settings tab here</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>LinkedIn credentials (optional)</summary>
-      <div class="faq-body">
-        <p>If you want Harvey to find prospects on LinkedIn, enter your LinkedIn email and password. Harvey uses a real browser to search LinkedIn like a human would, with random delays and rate limits to avoid detection.</p>
-        <p>If you skip this, Harvey will find prospects through Google searches and company website scraping instead.</p>
-      </div>
-    </details>
-
-    <details>
-      <summary>Cloudflare Browser Rendering (optional)</summary>
-      <div class="faq-body">
-        <p>This is only used during product training (when Harvey crawls your website to learn about your product). It handles JavaScript-heavy websites that a basic crawler can't read.</p>
-        <p>1. Sign up at <a href="https://dash.cloudflare.com" target="_blank" rel="noopener">Cloudflare</a> (paid Workers plan, ~$5/month)</p>
-        <p>2. Go to Workers &amp; Pages &gt; Browser Rendering</p>
-        <p>3. Create an API token with Browser Rendering Edit permissions</p>
-        <p>4. Enter your Account ID and API Token in the Settings tab</p>
-        <p>Without this, Harvey uses a built-in crawler that works fine for most websites but can't render JavaScript.</p>
-      </div>
-    </details>
-  </div>
-
-  <div class="help-section">
-    <h2>Common issues</h2>
-
-    <details>
-      <summary>"command not found: harvey"</summary>
-      <div class="faq-body">You need to activate the virtual environment first: <code>source .venv/bin/activate</code></div>
-    </details>
-
-    <details>
-      <summary>Instantly API returns 401</summary>
-      <div class="faq-body">Your API key is wrong, or you need the Growth plan (the free plan doesn't include API access). Double-check the key in Settings &gt; Integrations in your Instantly dashboard.</div>
-    </details>
-
-    <details>
-      <summary>Claude headless mode fails</summary>
-      <div class="faq-body">Make sure you've run <code>claude login</code> in your terminal and have an active Claude Max subscription. Harvey uses your existing subscription, not a separate API key.</div>
-    </details>
-
-    <details>
-      <summary>Codex calls fail</summary>
-      <div class="faq-body">With <code>brain.provider: codex</code>, set <code>brain.model</code> to an available model ID, including Luna, Sol, or Terra (for example <code>gpt-6.1-sol</code>), or leave it blank to select a listed model. Harvey runs these models without tools; <code>gpt-5.5</code> also remains supported when present in your account's catalog. Run <code>codex login</code> and choose "Sign in with ChatGPT" (API-key logins are refused). Harvey never renews your Codex login: if the log says it has expired or is due for renewal, use Codex once or run <code>codex login</code>. Harvey needs Codex CLI 0.159.3 on macOS or Linux (Codex isn't supported on Windows; use Claude there) and refuses other versions. While Codex can't be used, Harvey pauses (Today shows "Codex is paused" and why), leaves replies and queued emails untouched, and resumes once it's fixed; <code>harvey status --check</code> checks on demand. If the log says isolation could not be verified, a Codex config layer is forcing a tool, hook, MCP server or custom endpoint back on — Harvey refuses to send prompts until it is removed. Harvey never falls back to Claude on its own.</div>
-    </details>
-
-    <details>
-      <summary>Harvey isn't finding prospects</summary>
-      <div class="faq-body">Check that your ICP (ideal customer profile) in harvey.yaml has realistic titles, industries, and geography. If LinkedIn is set up, check that the credentials are correct. Check the Activity tab to see what Harvey has been trying to do.</div>
-    </details>
-  </div>
-</div>
-
+<div id="help" class="section"><div class="section-head"><div><h2>Using FindClients</h2><p>One product, researched prospects and manual conversations.</p></div></div><div class="card"><ol><li>Describe the product and target customer on the Leads page.</li><li>Add a company, or find companies with Discover. Confirm the signals you want in Signals.</li><li>Open a company card and run research. Review the source links, identity and exact excerpts.</li><li>Add specific reviews, business owner replies or professional posts manually where the source cannot be read automatically.</li><li>Check one relevant piece of evidence and draft an opening message from it. Edit and copy it for your own manual contact.</li><li>Record actual contact and replies, or export checked prospect research for a client.</li></ol><p>No email, SMS or social messages are sent. Research and drafted messages are not proof of buyer interest, qualified leads, meetings or revenue. An asking price is a note, not a payment.</p><p>Public sources can be wrong, incomplete or outdated. Avoid private life details and unsupported claims. A human check is your judgement, not independent verification. Review drafts before using them.</p><p>Keep costs small: company website research uses up to six pages and one AI selection call; each requested draft adds one AI call. Optional review/profile searches use two Serper queries. Search, discovery and provider limits still apply.</p></div></div>
 </div>
 </main>
 </div>
 
+<script src="/static/leads.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

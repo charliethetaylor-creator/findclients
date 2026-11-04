@@ -369,6 +369,8 @@ class Handler:
         heartbeat sends nothing in a cycle where this isn't True, because a
         reply that wasn't read can't have cancelled its queued follow-ups.
         """
+        logger.info("FindClients: automatic inbox handling is disabled.")
+        return True
         logger.info("Handler: Checking for replies...")
 
         # Load foundational skills for this agent

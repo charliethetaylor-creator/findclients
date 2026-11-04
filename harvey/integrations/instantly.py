@@ -151,6 +151,8 @@ class InstantlyClient:
 
     async def create_campaign(self, name: str) -> dict | None:
         """Create a new campaign. Returns campaign data with id."""
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         # stop_for_company: a reply from anyone at a company stops the
         # sequence to everyone there, as on Harvey's own providers.
         result = await self._request("POST", "/campaigns",
@@ -183,6 +185,8 @@ class InstantlyClient:
 
     async def activate_campaign(self, campaign_id: str) -> dict | None:
         """Start a campaign."""
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         result = await self._request("POST", f"/campaigns/{campaign_id}/activate")
         return result if isinstance(result, dict) else None
 
@@ -210,6 +214,8 @@ class InstantlyClient:
             ...
         ]
         """
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         result = await self._request(
             "POST",
             f"/campaigns/{campaign_id}/emails",
@@ -237,6 +243,8 @@ class InstantlyClient:
             }
         ]
         """
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         if not leads:
             logger.warning("add_leads called with an empty lead list; skipping.")
             return {}
@@ -275,6 +283,8 @@ class InstantlyClient:
         body: str,
     ) -> dict | None:
         """Send a reply to a lead's email."""
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         result = await self._request(
             "POST",
             "/emails/reply",

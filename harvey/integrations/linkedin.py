@@ -189,6 +189,8 @@ class LinkedInAutomation:
 
     async def login(self) -> bool:
         """Log into LinkedIn."""
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         if not self.page:
             await self.start()
 

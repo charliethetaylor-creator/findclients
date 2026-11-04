@@ -259,6 +259,8 @@ class Sender:
 
     async def run(self):
         """Deploy campaigns — natively through the outbox, or via Instantly."""
+        logger.info("FindClients: automatic sending is disabled.")
+        return
         if not self.config.channels.email.enabled:
             logger.info("Sender: Email channel disabled. Skipping.")
             return
@@ -323,6 +325,8 @@ class Sender:
 
     async def _deploy_campaign(self, campaign):
         """Deploy a single campaign to Instantly. Idempotent: safe to retry."""
+        logger.info("FindClients: automatic sending is disabled.")
+        return
         # Instantly owns campaign scheduling and has no per-message outbox
         # approval here. Fail closed rather than silently bypass the setting,
         # including retries of an already-created remote campaign.

@@ -58,6 +58,8 @@ class SmtpImapProvider(MailProvider):
         thread_ref: str = "",
         in_reply_to: str = "",
     ) -> SendResult:
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         persona = self.config.persona
         msg = EmailMessage()
         msg["To"] = to_email

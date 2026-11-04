@@ -224,6 +224,8 @@ class MicrosoftProvider(MailProvider):
         """Draft, then send, so the RFC Message-ID is known (bounces and
         replies are matched on it). A reply is drafted with createReply on
         the prospect's message, which sets In-Reply-To/References."""
+        from harvey.outreach_policy import reject_outreach
+        reject_outreach()
         content = {
             "subject": subject,
             "body": {"contentType": "Text", "content": body},

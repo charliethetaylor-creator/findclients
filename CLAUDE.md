@@ -1,3 +1,9 @@
+# FindClients fork: current instructions
+
+This is a research-only fork. Read README.md first. Never connect a mailbox, start sales automation or send outreach as part of setup. Use the Leads dashboard for on-demand research, checked source excerpts, draft-only messages and exports. Historical Harvey setup material below is superseded where it conflicts with this direction.
+
+---
+
 # Harvey — Autonomous AI Sales Agent
 
 Harvey is an autonomous sales agent powered by Claude Code. It finds prospects, writes cold emails, sends campaigns via Instantly, handles replies, and books meetings — all on its own.

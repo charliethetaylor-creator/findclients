@@ -257,6 +257,8 @@ async def record_send_phase(state, held_reason: str):
 
 async def heartbeat(stop_event: asyncio.Event | None = None):
     """Harvey's main loop. Wakes up, decides, acts, sleeps. Repeat."""
+    logger.info("FindClients uses on-demand research. Open the Leads page; the sales heartbeat is disabled.")
+    return
     if stop_event is None:
         stop_event = asyncio.Event()
 
